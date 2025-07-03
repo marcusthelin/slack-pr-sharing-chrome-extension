@@ -1,11 +1,17 @@
+/// <reference types="chrome" />
+
 // Listen for messages from content script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((
+  message: { type: string; webhookUrl: string; payload: object },
+  _sender: chrome.runtime.MessageSender,
+  sendResponse: (response: { success: boolean; error?: string }) => void
+) => {
   if (message.type === 'SEND_TO_SLACK') {
     sendToSlack(message.webhookUrl, message.payload)
       .then(() => sendResponse({ success: true }))
       .catch(error => sendResponse({ success: false, error: error.message }));
+    return true; // Required for async response
   }
-  return true; // Required for async response
 });
 
 async function sendToSlack(webhookUrl: string, message: object): Promise<void> {

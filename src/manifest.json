@@ -9,27 +9,19 @@
     "storage"
   ],
   "host_permissions": [
-    "https://github.com/*",
     "https://hooks.slack.com/*"
   ],
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "src/background.ts",
     "type": "module"
   },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "index.html"
   },
   "content_scripts": [
     {
       "matches": ["https://github.com/*/pull/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"]
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["styles.css"],
-      "matches": ["https://github.com/*"]
+      "js": ["src/content.ts"]
     }
   ]
 }

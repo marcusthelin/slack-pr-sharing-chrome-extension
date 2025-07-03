@@ -1,16 +1,8 @@
-import { Settings } from "./popup";
-
-interface PRInfo {
-  title: string;
-  url: string;
-  author: string;
-  description: string;
-  reviewers: string[];
-  repository: string;
-}
-
+import  { Settings } from "./types";
+import { PRInfo } from './types';
+import './input.css'
+import slackLogo from './slack-new-logo.svg'
 class PRExtractor {
-  private observer!: MutationObserver;
 
   constructor() {
     this.setupMessageListener();
@@ -41,11 +33,9 @@ class PRExtractor {
 
     // Create the button with GitHub's button styles
     const shareButton = document.createElement('button');
-    shareButton.className = 'btn btn-sm btn-block mt-2';
-    shareButton.style.backgroundColor = '#2ea44f';
-    shareButton.style.color = 'white';
-    shareButton.style.border = 'none';
-    shareButton.textContent = 'Share to Slack';
+    shareButton.className = 'btn btn-sm btn-block text-white pt-2 pb-2 d-flex gap-2';
+    shareButton.style.justifyContent = 'center';
+    shareButton.innerHTML = `<span>Share in Slack</span> <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
     shareButton.addEventListener('click', () => this.handleButtonClick());
 
     // Add the button to the page
@@ -57,7 +47,7 @@ class PRExtractor {
     try {
       let settings;
       try {
-        settings = await chrome.storage.sync.get(['webhookUrl', 'username']) as Settings;
+        settings = await chrome.storage.sync.get<Settings>(['webhookUrl', 'username', 'regex']);
       } catch (error) {
         // Handle extension context invalidation
         console.error('Extension context error:', error);
@@ -72,7 +62,7 @@ class PRExtractor {
       }
 
       const prInfo = this.getPRInfo();
-      const message = this.formatSlackMessage(prInfo, settings.username);
+      const message = this.formatSlackMessage(prInfo, settings);
       await this.sendToSlack(settings.webhookUrl, message);
       
       // Show success message
@@ -120,10 +110,16 @@ class PRExtractor {
     };
   }
 
-  private formatSlackMessage(prInfo: PRInfo, userId?: string) {
-    if (userId) {
+  private formatSlackMessage(prInfo: PRInfo, settings: Settings) {
+    console.log('🤯 🤢 🤮 ~ settings:', settings)
+    console.log('🤯 🤢 🤮 ~ prInfo:', prInfo)
+    if (settings.regex) {
+      const regex = new RegExp(settings.regex, 'm');
+      prInfo.title = prInfo.title.replace(regex, "")
+    }
+    if (settings.username) {
       return {
-        text: `PR from <@${userId}>: <${prInfo.url}|${prInfo.title}>`,
+        text: `PR from <@${settings.username}>: <${prInfo.url}|${prInfo.title}>`,
       }
     }
     return {
@@ -138,7 +134,7 @@ class PRExtractor {
       payload: message
     });
 
-    if (!response?.success) {
+    if (!response || !response.success) {
       throw new Error(response?.error || 'Failed to send message to Slack');
     }
   }
