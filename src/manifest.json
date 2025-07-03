@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub PR to Slack Sharing",
+  "version": "1.0.0",
+  "description": "Share GitHub Pull Requests to Slack with a predefined template",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://github.com/*",
+    "https://hooks.slack.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/pull/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["styles.css"],
+      "matches": ["https://github.com/*"]
+    }
+  ]
+}
