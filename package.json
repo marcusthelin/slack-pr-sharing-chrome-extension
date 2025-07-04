@@ -25,6 +25,7 @@
     "postcss": "^8.5.6",
     "tailwindcss": "4.1.11",
     "typescript": "^5.8.3",
-    "vite": "^7.0.1"
+    "vite": "^7.0.1",
+    "vite-plugin-zip-pack": "1.2.4"
   }
 }

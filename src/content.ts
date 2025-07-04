@@ -7,6 +7,21 @@ class PRExtractor {
   constructor() {
     this.setupMessageListener();
     this.injectShareButton();
+    // Listen on history push
+    window.addEventListener('popstate', () => {
+      console.log('History changed, re-injecting share button');
+      this.injectShareButton();
+    });
+
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+      const currentUrl = location.href;
+      if (currentUrl !== lastUrl) {
+        console.log('URL changed, re-injecting share button');
+        lastUrl = currentUrl;
+        this.injectShareButton();
+      }
+    }).observe(document.body, { subtree: true, childList: true })
   }
 
 
@@ -35,7 +50,7 @@ class PRExtractor {
     const shareButton = document.createElement('button');
     shareButton.className = 'btn btn-sm btn-block text-white pt-2 pb-2 d-flex gap-2';
     shareButton.style.justifyContent = 'center';
-    shareButton.innerHTML = `<span>Share in Slack</span> <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
+    shareButton.innerHTML = `Share in Slack <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
     shareButton.addEventListener('click', () => this.handleButtonClick());
 
     // Add the button to the page
@@ -61,60 +76,36 @@ class PRExtractor {
         return;
       }
 
-      const prInfo = this.getPRInfo();
+      const prInfo = this.getPRTitle();
       const message = this.formatSlackMessage(prInfo, settings);
       await this.sendToSlack(settings.webhookUrl, message);
       
-      // Show success message
-      const successMsg = document.createElement('div');
-      successMsg.className = 'flash flash-success mt-2';
-      successMsg.textContent = 'PR shared to Slack successfully!';
-      
-      const button = document.querySelector('[data-slack-share-button]');
-      if (button) {
-        button.parentNode?.insertBefore(successMsg, button.nextSibling);
-        setTimeout(() => successMsg.remove(), 3000);
-      }
+      this.reportStatus('PR shared in Slack successfully!');
     } catch (error) {
       console.error('Failed to share PR:', error);
       
       // More specific error message
       const errorMessage = error instanceof Error 
-        ? `Failed to share PR: ${error.message}` 
-        : 'Failed to share PR. Please try reloading the page.';
+        ? error.message
+        : 'Unknown error. Please try reloading the page.';
       
-      alert(errorMessage);
+      this.reportStatus(errorMessage, true);
     }
   }
 
-  private getPRInfo(): PRInfo {
+  private getPRTitle(): PRInfo {
     const title = document.querySelector('.js-issue-title')?.textContent?.trim() || '';
     const url = window.location.href;
-    const author = document.querySelector('.author')?.textContent?.trim() || '';
-    const description = document.querySelector('.comment-body')?.textContent?.trim() || '';
-    
-    const reviewers = Array.from(document.querySelectorAll('.js-issue-sidebar-form .participant-avatar'))
-      .map(el => (el as HTMLElement).getAttribute('aria-label') || '')
-      .filter(name => name && name !== author);
-
-    const [owner, repo] = window.location.pathname.split('/').filter(Boolean).slice(0, 2);
-    const repository = `${owner}/${repo}`;
 
     return {
       title,
       url,
-      author,
-      description,
-      reviewers,
-      repository
     };
   }
 
   private formatSlackMessage(prInfo: PRInfo, settings: Settings) {
-    console.log('🤯 🤢 🤮 ~ settings:', settings)
-    console.log('🤯 🤢 🤮 ~ prInfo:', prInfo)
     if (settings.regex) {
-      const regex = new RegExp(settings.regex, 'm');
+      const regex = new RegExp(settings.regex);
       prInfo.title = prInfo.title.replace(regex, "")
     }
     if (settings.username) {
@@ -140,7 +131,7 @@ class PRExtractor {
   }
 
   private setupMessageListener() {
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
       if (message.type === 'SHARE_PR') {
         this.handleButtonClick()
           .then(() => sendResponse({ success: true }))
@@ -148,6 +139,26 @@ class PRExtractor {
         return true; // Required for async response
       }
     });
+  }
+
+  private reportStatus(message: string, isError = false) {
+    const existingStatus = document.querySelector('[data-slack-status]');
+    if (existingStatus) {
+      existingStatus.remove();
+    }
+
+    const statusMsg = document.createElement('div');
+    statusMsg.className = `flash ${isError ? 'flash-error' : 'flash-success'} mt-2`;
+    statusMsg.setAttribute('data-slack-status', 'true');
+    statusMsg.textContent = message;
+    
+    const button = document.querySelector('[data-slack-share-button]');
+    if (button) {
+      button.parentNode?.insertBefore(statusMsg, button.nextSibling);
+      if (!isError) {
+        setTimeout(() => statusMsg.remove(), 7000);
+      }
+    }
   }
 }
 

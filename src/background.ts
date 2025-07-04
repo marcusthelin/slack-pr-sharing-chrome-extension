@@ -24,6 +24,6 @@ async function sendToSlack(webhookUrl: string, message: object): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to send message to Slack');
+    throw new Error(`Slack API error: ${response.status} - ${await response.text()}`);
   }
 }
