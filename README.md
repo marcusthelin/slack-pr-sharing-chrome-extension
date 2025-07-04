@@ -4,11 +4,13 @@ A Chrome extension that allows you to share GitHub Pull Requests to Slack with a
 
 ## Features
 
-- Share GitHub PRs to Slack with a single click
-- Customizable Slack webhook URL and channel
-- Beautiful message formatting in Slack
-- Includes PR title, description, author, and reviewers
-- Settings are saved locally
+- Share GitHub PRs to Slack with a single click via an inline button
+- Customizable Slack webhook URL
+- Seamless integration into GitHub's PR interface
+- Includes PR title and URL in the Slack message
+- Settings are saved in Chrome sync storage
+
+![Screenshot](./screenshot.png)
 
 ## Setup
 
@@ -36,8 +38,7 @@ A Chrome extension that allows you to share GitHub Pull Requests to Slack with a
 
 2. Configure the extension:
    - Click the extension icon in Chrome
-   - Enter your Slack webhook URL
-   - Enter the target channel (e.g., #pull-requests)
+   - Enter your Slack webhook URL (this includes the target channel)
    - Click "Save Settings"
 
 3. Share a PR:
@@ -49,18 +50,27 @@ A Chrome extension that allows you to share GitHub Pull Requests to Slack with a
 
 To work on the extension:
 
-1. Run the watch script:
+1. Run the development server:
    ```bash
-   pnpm run watch
+   pnpm run dev
    ```
 2. Make your changes in the `src` directory
-3. The extension will be automatically rebuilt when files change
+3. Vite will automatically rebuild when files change
 4. Reload the extension in Chrome to see your changes
+
+The project uses:
+- Vite for building
+- TypeScript for type safety
+- Tailwind CSS for styling
+- CRXJS for extension bundling
 
 ## File Structure
 
 - `src/manifest.json` - Extension manifest
-- `src/popup.html` - Extension popup UI
-- `src/popup.ts` - Popup functionality
+- `src/popup.ts` - Popup UI and functionality
 - `src/content.ts` - Content script for extracting PR information
-- `src/styles.css` - Popup styles
+- `src/settings.ts` - Settings management
+- `src/background.ts` - Background script
+- `src/input.css` - Tailwind CSS styles
+- `src/types.ts` - TypeScript type definitions
+- `src/global.d.ts` - Global type declarations
