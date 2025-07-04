@@ -1,4 +1,4 @@
-import './input.css'
+import './popup.css'
 import { loadSettings } from './settings';
 import { Settings } from './types';
 
