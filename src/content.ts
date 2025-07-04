@@ -7,17 +7,11 @@ class PRExtractor {
   constructor() {
     this.setupMessageListener();
     this.injectShareButton();
-    // Listen on history push
-    window.addEventListener('popstate', () => {
-      console.log('History changed, re-injecting share button');
-      this.injectShareButton();
-    });
 
     let lastUrl = location.href;
     new MutationObserver(() => {
       const currentUrl = location.href;
       if (currentUrl !== lastUrl) {
-        console.log('URL changed, re-injecting share button');
         lastUrl = currentUrl;
         this.injectShareButton();
       }
@@ -115,6 +109,7 @@ class PRExtractor {
     }
     return {
       text: `PR: <${prInfo.url}|${prInfo.title}>`,
+      unfurl_links: false
     };
   }
 
