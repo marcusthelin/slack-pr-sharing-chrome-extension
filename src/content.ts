@@ -1,6 +1,6 @@
+import './content.css'
 import  { Settings } from "./types";
 import { PRInfo } from './types';
-import './input.css'
 import slackLogo from './slack-new-logo.svg'
 class PRExtractor {
 
@@ -35,21 +35,32 @@ class PRExtractor {
       return;
     }
 
+    // Create the root container for scoped styles
+    const rootContainer = document.createElement('div');
+    rootContainer.id = 'slack-pr-sharing-root';
+
     // Create the button container
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'discussion-sidebar-item';
     buttonContainer.setAttribute('data-slack-share-button', 'true');
 
-    // Create the button with GitHub's button styles
+    // Create the button with GitHub's button styles combined with our scoped styles
     const shareButton = document.createElement('button');
     shareButton.className = 'btn btn-sm btn-block text-white pt-2 pb-2 d-flex gap-2';
+    // shareButton.style.display = 'flex';
+    // shareButton.style.width = '100%';
+    // shareButton.style.alignItems = 'center';
+    // shareButton.style.gap = '8px';
     shareButton.style.justifyContent = 'center';
     shareButton.innerHTML = `Share in Slack <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
     shareButton.addEventListener('click', () => this.handleButtonClick());
 
-    // Add the button to the page
+    // Add the button to the root container
     buttonContainer.appendChild(shareButton);
-    targetContainer.parentNode?.insertBefore(buttonContainer, targetContainer.nextSibling);
+    rootContainer.appendChild(buttonContainer);
+    
+    // Insert the root container into the page
+    targetContainer.appendChild(rootContainer);
   }
 
   private async handleButtonClick() {
@@ -143,7 +154,7 @@ class PRExtractor {
     }
 
     const statusMsg = document.createElement('div');
-    statusMsg.className = `flash ${isError ? 'flash-error' : 'flash-success'} mt-2`;
+    statusMsg.className = `flash ${isError ? 'flash-error' : 'flash-success'} mt-2 text-center text-sm`;
     statusMsg.setAttribute('data-slack-status', 'true');
     statusMsg.textContent = message;
     

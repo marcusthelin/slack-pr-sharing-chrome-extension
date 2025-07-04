@@ -5,4 +5,5 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  important: '#slack-pr-sharing-root' // Scope all styles
 }
