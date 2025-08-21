@@ -14,12 +14,27 @@ class PRExtractor {
       if (currentUrl !== lastUrl) {
         lastUrl = currentUrl;
         this.injectShareButton();
+      } else {
+        // Check if our button still exists, if not, re-inject it
+        const existingButton = document.querySelector('[data-slack-share-button]');
+        if (!existingButton && this.isPRPage()) {
+          this.injectShareButton();
+        }
       }
     }).observe(document.body, { subtree: true, childList: true })
   }
 
+  private isPRPage(): boolean {
+    return window.location.pathname.includes('/pull/');
+  }
+
 
   private injectShareButton() {
+    // Only inject on PR pages
+    if (!this.isPRPage()) {
+      return;
+    }
+
     // Remove any existing share buttons first
     const existingButton = document.querySelector('[data-slack-share-button]');
     if (existingButton) {
