@@ -131,7 +131,12 @@ class PRExtractor {
     const parts = pathname.split('/');
     
     if (parts.length >= 3) {
-      // parts[1] is owner, parts[2] is repo name
+    // parts[1] is owner, parts[2] is repo name
+    if (
+      parts.length >= 3 &&
+      parts[1] && parts[2] &&
+      parts[1].trim() !== '' && parts[2].trim() !== ''
+    ) {
       return parts[2];
     }
     
