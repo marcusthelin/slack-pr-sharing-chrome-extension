@@ -123,18 +123,36 @@ class PRExtractor {
     };
   }
 
+  private getRepositoryName(): string {
+    // Extract repository name from GitHub URL
+    // URL format: https://github.com/owner/repo/pull/123
+    const pathname = window.location.pathname;
+    const parts = pathname.split('/');
+    
+    if (parts.length >= 3) {
+      // parts[1] is owner, parts[2] is repo name
+      return parts[2];
+    }
+    
+    return '';
+  }
+
   private formatSlackMessage(prInfo: PRInfo, settings: Settings) {
+    const repoName = this.getRepositoryName();
+    const prefix = repoName ? `${repoName} - ` : '';
+    
     if (settings.regex) {
       const regex = new RegExp(settings.regex);
       prInfo.title = prInfo.title.replace(regex, "")
     }
+    
     if (settings.username) {
       return {
-        text: `PR from <@${settings.username}>: <${prInfo.url}|${prInfo.title}>`,
+        text: `PR from <@${settings.username}>: <${prInfo.url}|${prefix}${prInfo.title}>`,
       }
     }
     return {
-      text: `PR: <${prInfo.url}|${prInfo.title}>`,
+      text: `PR: <${prInfo.url}|${prefix}${prInfo.title}>`,
       unfurl_links: false
     };
   }
