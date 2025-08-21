@@ -25,7 +25,8 @@ class PRExtractor {
   }
 
   private isPRPage(): boolean {
-    return window.location.pathname.includes('/pull/');
+    // Match /owner/repo/pull/number exactly (no trailing slash or extra path)
+    return /^\/[^\/]+\/[^\/]+\/pull\/\d+$/.test(window.location.pathname);
   }
 
 
