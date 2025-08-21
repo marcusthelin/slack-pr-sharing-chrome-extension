@@ -14,12 +14,28 @@ class PRExtractor {
       if (currentUrl !== lastUrl) {
         lastUrl = currentUrl;
         this.injectShareButton();
+      } else {
+        // Check if our button still exists, if not, re-inject it
+        const existingButton = document.querySelector('[data-slack-share-button]');
+        if (!existingButton && this.isPRPage()) {
+          this.injectShareButton();
+        }
       }
     }).observe(document.body, { subtree: true, childList: true })
   }
 
+  private isPRPage(): boolean {
+    // Match /owner/repo/pull/number exactly (no trailing slash or extra path)
+    return /^\/[^\/]+\/[^\/]+\/pull\/\d+$/.test(window.location.pathname);
+  }
+
 
   private injectShareButton() {
+    // Only inject on PR pages
+    if (!this.isPRPage()) {
+      return;
+    }
+
     // Remove any existing share buttons first
     const existingButton = document.querySelector('[data-slack-share-button]');
     if (existingButton) {
@@ -108,18 +124,40 @@ class PRExtractor {
     };
   }
 
+  private getRepositoryName(): string {
+    // Extract repository name from GitHub URL
+    // URL format: https://github.com/owner/repo/pull/123
+    const pathname = window.location.pathname;
+    const parts = pathname.split('/');
+    
+    // parts[1] is owner, parts[2] is repo name
+    if (
+      parts.length >= 3 &&
+      parts[1] && parts[2] &&
+      parts[1].trim() !== '' && parts[2].trim() !== ''
+    ) {
+      return parts[2];
+    }
+    
+    return '';
+  }
+
   private formatSlackMessage(prInfo: PRInfo, settings: Settings) {
+    const repoName = this.getRepositoryName();
+    const prefix = repoName ? `${repoName} - ` : '';
+    
     if (settings.regex) {
       const regex = new RegExp(settings.regex);
       prInfo.title = prInfo.title.replace(regex, "")
     }
+    
     if (settings.username) {
       return {
-        text: `PR from <@${settings.username}>: <${prInfo.url}|${prInfo.title}>`,
+        text: `PR from <@${settings.username}>: <${prInfo.url}|${prefix}${prInfo.title}>`,
       }
     }
     return {
-      text: `PR: <${prInfo.url}|${prInfo.title}>`,
+      text: `PR: <${prInfo.url}|${prefix}${prInfo.title}>`,
       unfurl_links: false
     };
   }

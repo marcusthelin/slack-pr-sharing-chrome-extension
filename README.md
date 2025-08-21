@@ -7,7 +7,7 @@ A Chrome extension that allows you to share GitHub Pull Requests to Slack with a
 - Share GitHub PRs to Slack with a single click via an inline button
 - Customizable Slack webhook URL
 - Seamless integration into GitHub's PR interface
-- Includes PR title and URL in the Slack message
+- Includes repository name, PR title and URL in the Slack message
 - Settings are saved in Chrome sync storage
 
 ![Screenshot](./screenshot.png)

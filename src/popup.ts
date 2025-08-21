@@ -1,5 +1,4 @@
 import './popup.css'
-import { loadSettings } from './settings';
 import { Settings } from './types';
 
 class PopupManager {
@@ -21,10 +20,19 @@ class PopupManager {
   }
 
   private async loadSettings() {
-    const settings = await loadSettings();
-    this.webhookInput.value = settings.webhookUrl;
-    this.usernameInput.value = settings.username;
-    this.regexInput.value = settings.regex;
+    try {
+      // Load settings directly from storage for the popup, not using the runtime loadSettings
+      // which throws an error if webhook URL is not set
+      const settings = await chrome.storage.sync.get(['webhookUrl', 'username', 'regex']);
+      this.webhookInput.value = settings.webhookUrl || '';
+      this.usernameInput.value = settings.username || '';
+      this.regexInput.value = settings.regex || '^[a-zA-Z]{3}-[0-9]+';
+    } catch (error) {
+      // Set default values if loading fails
+      this.webhookInput.value = '';
+      this.usernameInput.value = '';
+      this.regexInput.value = '^[a-zA-Z]{3}-[0-9]+';
+    }
   }
 
   private setupEventListeners() {
