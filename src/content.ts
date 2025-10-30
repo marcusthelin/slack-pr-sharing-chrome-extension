@@ -146,18 +146,26 @@ class PRExtractor {
     const repoName = this.getRepositoryName();
     const prefix = repoName ? `${repoName} - ` : '';
     
+    let title = prInfo.title;
+    
     if (settings.regex) {
       const regex = new RegExp(settings.regex);
-      prInfo.title = prInfo.title.replace(regex, "")
+      title = title.replace(regex, "")
     }
+    
+    // Escape special Slack characters in the title
+    // These characters have special meaning in Slack's mrkdwn format
+    title = title.replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;');
     
     if (settings.username) {
       return {
-        text: `PR from <@${settings.username}>: <${prInfo.url}|${prefix}${prInfo.title}>`,
+        text: `PR from <@${settings.username}>: <${prInfo.url}|${prefix}${title}>`,
       }
     }
     return {
-      text: `PR: <${prInfo.url}|${prefix}${prInfo.title}>`,
+      text: `PR: <${prInfo.url}|${prefix}${title}>`,
       unfurl_links: false
     };
   }
