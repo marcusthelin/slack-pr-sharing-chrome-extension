@@ -51,6 +51,11 @@ class PRExtractor {
       return;
     }
 
+    // Check if this PR has already been shared in this session
+    const currentUrl = window.location.href;
+    const sharedKey = `slack_pr_shared_${currentUrl}`;
+    const alreadyShared = sessionStorage.getItem(sharedKey);
+
     // Create the root container for scoped styles
     const rootContainer = document.createElement('div');
     rootContainer.id = 'slack-pr-sharing-root';
@@ -68,8 +73,16 @@ class PRExtractor {
     // shareButton.style.alignItems = 'center';
     // shareButton.style.gap = '8px';
     shareButton.style.justifyContent = 'center';
-    shareButton.innerHTML = `Share in Slack <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
-    shareButton.addEventListener('click', () => this.handleButtonClick());
+    
+    if (alreadyShared) {
+      shareButton.innerHTML = `✓ Already shared <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
+      shareButton.disabled = true;
+      shareButton.style.opacity = '0.6';
+      shareButton.style.cursor = 'not-allowed';
+    } else {
+      shareButton.innerHTML = `Share in Slack <img src="${slackLogo}" alt="Slack Logo" style="width: 16px; height: 16px;">`;
+      shareButton.addEventListener('click', () => this.handleButtonClick());
+    }
 
     // Add the button to the root container
     buttonContainer.appendChild(shareButton);
@@ -81,6 +94,17 @@ class PRExtractor {
 
   private async handleButtonClick() {
     try {
+      const currentUrl = window.location.href;
+      
+      // Check if this PR has already been shared in this session
+      const sharedKey = `slack_pr_shared_${currentUrl}`;
+      const alreadyShared = sessionStorage.getItem(sharedKey);
+      
+      if (alreadyShared) {
+        this.reportStatus('This PR has already been shared in this session.');
+        return;
+      }
+
       let settings;
       try {
         settings = await chrome.storage.sync.get<Settings>(['webhookUrl', 'username', 'regex']);
@@ -101,6 +125,9 @@ class PRExtractor {
       const message = this.formatSlackMessage(prInfo, settings);
       await this.sendToSlack(settings.webhookUrl, message);
       
+      // Mark this PR as shared in session storage
+      sessionStorage.setItem(sharedKey, 'true');
+      this.injectShareButton(); // Update button state
       this.reportStatus('PR shared in Slack successfully!');
     } catch (error) {
       console.error('Failed to share PR:', error);
