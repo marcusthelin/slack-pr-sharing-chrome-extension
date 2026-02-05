@@ -142,7 +142,18 @@ class PRExtractor {
   }
 
   private getPRTitle(): PRInfo {
-    const title = document.querySelector('.js-issue-title')?.textContent?.trim() || '';
+    const possibleTitleSelectors = [
+      '[data-component="PH_Title"] > span', // New GitHub UI title
+      '.js-issue-title', // Standard PR title
+    ];
+    let title = '';
+    for (const selector of possibleTitleSelectors) {
+      const titleElement = document.querySelector(selector);
+      if (titleElement && titleElement.textContent) {
+        title = titleElement.textContent.trim();
+        break;
+      }
+    }
     const url = window.location.href;
 
     return {
