@@ -5,7 +5,7 @@ export interface PRInfo {
 
 export type Settings = {
   webhookUrl: string;
-  memberId?: string;
+  username?: string;
   regex?: string;
 }
 
