@@ -107,7 +107,7 @@ class PRExtractor {
 
       let settings;
       try {
-        settings = await chrome.storage.sync.get<Settings>(['webhookUrl', 'username', 'regex']);
+        settings = await chrome.storage.sync.get<Settings>(['webhookUrl', 'memberId', 'regex']);
       } catch (error) {
         // Handle extension context invalidation
         console.error('Extension context error:', error);
@@ -197,9 +197,9 @@ class PRExtractor {
                  .replace(/</g, '&lt;')
                  .replace(/>/g, '&gt;');
     
-    if (settings.username) {
+    if (settings.memberId) {
       return {
-        text: `PR from <@${settings.username}>: <${prInfo.url}|${prefix}${title}>`,
+        text: `PR from <@${settings.memberId}>: <${prInfo.url}|${prefix}${title}>`,
       }
     }
     return {

@@ -3,14 +3,14 @@ import { Settings } from './types';
 
 class PopupManager {
   private webhookInput: HTMLInputElement;
-  private usernameInput: HTMLInputElement;
+  private memberIdInput: HTMLInputElement;
   private regexInput: HTMLInputElement;
   private saveButton: HTMLButtonElement;
   private statusDiv: HTMLDivElement;
 
   constructor() {
     this.webhookInput = document.getElementById('slack-webhook') as HTMLInputElement;
-    this.usernameInput = document.getElementById('slack-username') as HTMLInputElement;
+    this.memberIdInput = document.getElementById('slack-username') as HTMLInputElement;
     this.regexInput = document.getElementById('regex') as HTMLInputElement;
     this.saveButton = document.getElementById('save-settings') as HTMLButtonElement;
     this.statusDiv = document.getElementById('status') as HTMLDivElement;
@@ -23,14 +23,14 @@ class PopupManager {
     try {
       // Load settings directly from storage for the popup, not using the runtime loadSettings
       // which throws an error if webhook URL is not set
-      const settings = await chrome.storage.sync.get(['webhookUrl', 'username', 'regex']);
+      const settings = await chrome.storage.sync.get(['webhookUrl', 'memberId', 'regex']);
       this.webhookInput.value = settings.webhookUrl || '';
-      this.usernameInput.value = settings.username || '';
+      this.memberIdInput.value = settings.memberId || '';
       this.regexInput.value = settings.regex || '^[a-zA-Z]{3}-[0-9]+';
     } catch (error) {
       // Set default values if loading fails
       this.webhookInput.value = '';
-      this.usernameInput.value = '';
+      this.memberIdInput.value = '';
       this.regexInput.value = '^[a-zA-Z]{3}-[0-9]+';
     }
   }
@@ -42,7 +42,7 @@ class PopupManager {
   private async saveSettings() {
     const settings: Settings = {
       webhookUrl: this.webhookInput.value,
-      username: this.usernameInput.value.trim(),
+      memberId: this.memberIdInput.value.trim(),
       regex: this.regexInput.value.trim()
     };
 
