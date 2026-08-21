@@ -10,7 +10,7 @@ class PopupManager {
 
   constructor() {
     this.webhookInput = document.getElementById('slack-webhook') as HTMLInputElement;
-    this.memberIdInput = document.getElementById('slack-username') as HTMLInputElement;
+    this.memberIdInput = document.getElementById('slack-member-id') as HTMLInputElement;
     this.regexInput = document.getElementById('regex') as HTMLInputElement;
     this.saveButton = document.getElementById('save-settings') as HTMLButtonElement;
     this.statusDiv = document.getElementById('status') as HTMLDivElement;
