@@ -144,6 +144,7 @@ class PRExtractor {
   private getPRTitle(): PRInfo {
     const possibleTitleSelectors = [
       '[data-component="PH_Title"] > span', // New GitHub UI title
+      'h1[data-component="Heading"] > [data-component="Text"]', // Alternate GitHub PR title
       '.js-issue-title', // Standard PR title
     ];
     let title = '';
