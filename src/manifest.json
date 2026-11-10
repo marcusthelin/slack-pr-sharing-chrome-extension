@@ -1,11 +1,9 @@
 {
   "manifest_version": 3,
   "name": "GitHub PR to Slack Sharing",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Share GitHub Pull Requests to Slack with a predefined template",
   "permissions": [
-    "activeTab",
-    "scripting",
     "storage"
   ],
   "host_permissions": [
