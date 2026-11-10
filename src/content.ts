@@ -42,8 +42,9 @@ class PRExtractor {
       existingButton.remove();
     }
 
-    // Find the right sidebar section where we want to add our button
-    const targetContainer = document.querySelector('.discussion-sidebar-item');
+    // GitHub's A/B layout replaces discussion-sidebar-item with sticky-sidebar.
+    const targetContainer = document.querySelector('.discussion-sidebar-item')
+      ?? document.querySelector('[data-testid="sticky-sidebar"]');
     if (!targetContainer) {
       // If we can't find the container, try again in a moment
       // This helps with GitHub's dynamic loading
@@ -88,8 +89,13 @@ class PRExtractor {
     buttonContainer.appendChild(shareButton);
     rootContainer.appendChild(buttonContainer);
     
-    // Insert the root container into the page
-    targetContainer.appendChild(rootContainer);
+    // Keep the button near the top of GitHub's new sidebar.
+    const activitySection = targetContainer.querySelector(':scope > section[aria-label="Activity"]');
+    if (activitySection) {
+      activitySection.after(rootContainer);
+    } else {
+      targetContainer.appendChild(rootContainer);
+    }
   }
 
   private async handleButtonClick() {
